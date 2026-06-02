@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Track your 3D printer filament spools with this mobile-friendly web app powered by Firebase">
+    <title>Filament Tracker - 3D Printing Inventory Management</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%234CAF50'/><path d='M50 20 L70 35 L70 65 Q70 80 50 80 Q30 80 30 65 L30 35 Z' fill='white'/></svg>">
+</head>
+<body>
+    <!-- Mobile Navigation Header -->
+    <header class="app-header">
+        <div class="header-content">
+            <h1 class="app-title">🎨 Filament Tracker</h1>
+            <div class="header-actions">
+                <button id="themeToggle" class="btn-icon" title="Toggle dark mode" aria-label="Toggle dark mode">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <button id="refreshBtn" class="btn-icon" title="Refresh data" aria-label="Refresh data">
+                    <span>🔄</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-container">
+        <!-- View Container - Shows different views based on current state -->
+        <div id="viewContainer" class="view-container">
+            
+            <!-- Dashboard View (Default) -->
+            <div id="dashboardView" class="view active">
+                <!-- Statistics Section -->
+                <section class="stats-section">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalSpools">0</div>
+                            <div class="stat-label">Total Spools</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalWeight">0kg</div>
+                            <div class="stat-label">Total Weight</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="totalCost">$0</div>
+                            <div class="stat-label">Total Cost</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-number" id="lowStockCount">0</div>
+                            <div class="stat-label">Low Stock</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Search and Filter Section -->
+                <section class="search-section">
+                    <div class="search-container">
+                        <span class="search-icon">🔍</span>
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Search by brand, color, or material..." 
+                            class="search-input"
+                            aria-label="Search spools"
+                        >
+                    </div>
+                    <div class="filter-chips">
+                        <button class="filter-chip active" data-material="all">All</button>
+                        <button class="filter-chip" data-material="PLA">PLA</button>
+                        <button class="filter-chip" data-material="PETG">PETG</button>
+                        <button class="filter-chip" data-material="ABS">ABS</button>
+                        <button class="filter-chip" data-material="TPU">TPU</button>
+                        <button class="filter-chip" data-material="Other">Other</button>
+                    </div>
+                </section>
+
+                <!-- Add New Spool Button -->
+                <section class="action-section">
+                    <button id="addSpoolBtn" class="btn btn-primary btn-large">
+                        + Add New Spool
+                    </button>
+                </section>
+
+                <!-- Spools Grid -->
+                <section class="spools-section">
+                    <div id="spoolsGrid" class="spools-grid">
+                        <!-- Spool cards will be inserted here dynamically -->
+                    </div>
+                    <div id="emptyState" class="empty-state" style="display: none;">
+                        <div class="empty-icon">📭</div>
+                        <h2>No Spools Found</h2>
+                        <p>Add your first filament spool to get started!</p>
+                        <button id="emptyAddBtn" class="btn btn-primary">Add First Spool</button>
+                    </div>
+                </section>
+            </div>
+
+            <!-- Spool Detail View -->
+            <div id="detailView" class="view" style="display: none;">
+                <button class="btn-back" id="backFromDetail">← Back</button>
+                <div id="spoolDetail" class="spool-detail-container">
+                    <!-- Detail content will be inserted here -->
+                </div>
+            </div>
+
+            <!-- Add/Edit Form View -->
+            <div id="formView" class="view" style="display: none;">
+                <button class="btn-back" id="backFromForm">← Back</button>
+                <div class="form-container">
+                    <h2 id="formTitle">Add New Spool</h2>
+                    <form id="spoolForm" class="spool-form">
+                        <!-- Basic Info -->
+                        <fieldset class="form-section">
+                            <legend>Basic Information</legend>
+                            <div class="form-group">
+                                <label for="spoolBrand">Brand *</label>
+                                <input 
+                                    type="text" 
+                                    id="spoolBrand" 
+                                    placeholder="e.g., Sunlu, Prusament, MatterHackers" 
+                                    required
+                                    autocomplete="off"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="spoolMaterial">Material *</label>
+                                <select id="spoolMaterial" required>
+                                    <option value="">Select material...</option>
+                                    <option value="PLA">PLA</option>
+                                    <option value="PETG">PETG</option>
+                                    <option value="ABS">ABS</option>
+                                    <option value="TPU">TPU</option>
+                                    <option value="Nylon">Nylon</option>
+                                    <option value="Carbon Fiber">Carbon Fiber</option>
+                                    <option value="ASA">ASA</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="spoolColor">Color *</label>
+                                <div class="color-picker-wrapper">
+                                    <input 
+                                        type="color" 
+                                        id="spoolColorPicker" 
+                                        value="#000000"
+                                    >
+                                    <input 
+                                        type="text" 
+                                        id="spoolColor" 
+                                        placeholder="e.g., Black, Red, Natural" 
+                                        required
+                                        autocomplete="off"
+                                    >
+                                </div>
+                            </div>
+                        </fieldset>
+
+                        <!-- Weight Info -->
+                        <fieldset class="form-section">
+                            <legend>Weight Information</legend>
+                            <div class="form-group">
+                                <label for="spoolOriginalWeight">Original Spool Weight (g) *</label>
+                                <input 
+                                    type="number" 
+                                    id="spoolOriginalWeight" 
+                                    placeholder="e.g., 1000" 
+                                    min="1" 
+                                    step="1"
+                                    required
+                                    autocomplete="off"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="spoolRemainingWeight">Remaining Weight (g) *</label>
+                                <input 
+                                    type="number" 
+                                    id="spoolRemainingWeight" 
+                                    placeholder="e.g., 850" 
+                                    min="0" 
+                                    step="0.1"
+                                    required
+                                    autocomplete="off"
+                                >
+                            </div>
+                            <div id="weightPercentage" class="weight-percentage-display" style="display: none;">
+                                <div class="progress-bar">
+                                    <div id="progressFill" class="progress-fill"></div>
+                                </div>
+                                <span id="percentageText"></span>
+                            </div>
+                        </fieldset>
+
+                        <!-- Purchase Info -->
+                        <fieldset class="form-section">
+                            <legend>Purchase Information</legend>
+                            <div class="form-group">
+                                <label for="spoolPurchaseDate">Purchase Date</label>
+                                <input 
+                                    type="date" 
+                                    id="spoolPurchaseDate"
+                                    autocomplete="off"
+                                >
+                            </div>
+                            <div class="form-group">
+                                <label for="spoolCost">Cost ($)</label>
+                                <input 
+                                    type="number" 
+                                    id="spoolCost" 
+                                    placeholder="e.g., 15.99" 
+                                    min="0" 
+                                    step="0.01"
+                                    autocomplete="off"
+                                >
+                            </div>
+                        </fieldset>
+
+                        <!-- Notes -->
+                        <fieldset class="form-section">
+                            <legend>Additional Notes</legend>
+                            <div class="form-group">
+                                <label for="spoolNotes">Notes</label>
+                                <textarea 
+                                    id="spoolNotes" 
+                                    placeholder="Any additional notes about this spool..." 
+                                    rows="3"
+                                ></textarea>
+                            </div>
+                        </fieldset>
+
+                        <!-- Form Actions -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary btn-large">
+                                <span id="submitBtnText">Save Spool</span>
+                            </button>
+                            <button type="button" id="formCancelBtn" class="btn btn-secondary btn-large">
+                                Cancel
+                            </button>
+                        </div>
+
+                        <input type="hidden" id="spoolEditId">
+                    </form>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Loading Indicator -->
+    <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast" role="alert"></div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"></script>
+
+    <!-- Application Scripts -->
+    <script src="firebase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

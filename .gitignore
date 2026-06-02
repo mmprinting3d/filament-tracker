@@ -1,0 +1,37 @@
+# Environment and Configuration
+.env
+.env.local
+firebase-config.local.js
+
+# IDE and Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+*.sublime-workspace
+*.sublime-project
+
+# Node.js (if using build tools)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist/
+build/
+
+# Testing
+coverage/
+.nyc_output
+
+# OS Files
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Logs
+*.log
+logs/
