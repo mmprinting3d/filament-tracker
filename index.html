@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Filament Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+</head>
+<body class="dark-mode"> <header>
+        <div class="header-container">
+            <h1><span class="material-icons">layers</span> Filament Tracker</h1>
+            <button id="toggle-theme" class="icon-btn"><span class="material-icons">light_mode</span></button>
+        </div>
+    </header>
+
+    <main class="container">
+        <section class="stats-grid" id="stats-container">
+            <div class="stat-card">
+                <span class="stat-label">Total Spools</span>
+                <span class="stat-value" id="stat-total-spools">0</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Weight Remaining</span>
+                <span class="stat-value" id="stat-total-weight">0g</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Total Value</span>
+                <span class="stat-value" id="stat-total-cost">$0.00</span>
+            </div>
+        </section>
+
+        <section class="controls-card">
+            <div class="search-box">
+                <span class="material-icons search-icon">search</span>
+                <input type="text" id="search-input" placeholder="Search brand, color, or notes...">
+            </div>
+            <div class="filter-box">
+                <select id="filter-material">
+                    <option value="">All Materials</option>
+                    <option value="PLA">PLA</option>
+                    <option value="PETG">PETG</option>
+                    <option value="TPU">TPU</option>
+                    <option value="ABS">ABS</option>
+                    <option value="ASA">ASA</option>
+                    <option value="Nylon">Nylon</option>
+                    <option value="Other">Other</option>
+                </select>
+                <button id="btn-open-add-modal" class="btn btn-primary"><span class="material-icons">add</span> Add Spool</button>
+            </div>
+        </section>
+
+        <section id="single-spool-container" class="hidden"></section>
+
+        <section class="spool-grid" id="spool-grid">
+            <div class="loading-spinner">Loading inventory...</div>
+        </section>
+    </main>
+
+    <div id="spool-modal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modal-title">Add New Spool</h2>
+                <button id="btn-close-modal" class="icon-btn"><span class="material-icons">close</span></button>
+            </div>
+            <form id="spool-form">
+                <input type="hidden" id="form-id">
+                
+                <div class="form-group">
+                    <label for="form-brand">Brand *</label>
+                    <input type="text" id="form-brand" required placeholder="e.g., Sunlu, Hatchbox">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="form-material">Material *</label>
+                        <select id="form-material" required>
+                            <option value="PLA">PLA</option>
+                            <option value="PETG">PETG</option>
+                            <option value="TPU">TPU</option>
+                            <option value="ABS">ABS</option>
+                            <option value="ASA">ASA</option>
+                            <option value="Nylon">Nylon</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="form-color">Color *</label>
+                        <input type="text" id="form-color" required placeholder="e.g., Jet Black">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="form-original-weight">Original Net Weight (g) *</label>
+                        <input type="number" id="form-original-weight" min="0" required placeholder="e.g., 1000">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-remaining-weight">Remaining Weight (g) *</label>
+                        <input type="number" id="form-remaining-weight" min="0" required placeholder="e.g., 1000">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="form-cost">Cost ($) *</label>
+                        <input type="number" id="form-cost" step="0.01" min="0" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-purchase-date">Purchase Date</label>
+                        <input type="date" id="form-purchase-date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="form-notes">Notes</label>
+                    <textarea id="form-notes" rows="3" placeholder="Print settings, drying time, temp preferences..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="btn-delete-spool" class="btn btn-danger hidden">Delete Spool</button>
+                    <button type="submit" class="btn btn-primary">Save Spool</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
