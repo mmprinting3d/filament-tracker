@@ -60,13 +60,13 @@
 
 // Replace this with your Firebase configuration
 const firebaseConfig = {
-    apiKey: "YOUR_API_KEY_HERE",
-    authDomain: "YOUR_AUTH_DOMAIN_HERE",
-    projectId: "YOUR_PROJECT_ID_HERE",
-    storageBucket: "YOUR_STORAGE_BUCKET_HERE",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID_HERE",
-    appId: "YOUR_APP_ID_HERE",
-    measurementId: "YOUR_MEASUREMENT_ID_HERE" // Optional
+  apiKey: "AIzaSyBEOvl2s_Ysxjgc3f0eWfciFPOj-xESukw",
+  authDomain: "mm-filament-tracker.firebaseapp.com",
+  projectId: "mm-filament-tracker",
+  storageBucket: "mm-filament-tracker.firebasestorage.app",
+  messagingSenderId: "615892017839",
+  appId: "1:615892017839:web:a453f3581248b18a93ea5a",
+  measurementId: "G-50ZNZV620S"
 };
 
 /**
