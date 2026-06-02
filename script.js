@@ -34,6 +34,9 @@ const statTotalCost = document.getElementById("stat-total-cost");
 const urlParams = new URLSearchParams(window.location.search);
 const targetSpoolId = urlParams.get('id');
 
+// Set theme toggle icon correctly for default Light Mode on boot
+themeToggle.innerHTML = `<span class="material-icons">dark_mode</span>`;
+
 // --- Real-time Firestore Sync Subscriptions ---
 function initAppListeners() {
     onSnapshot(spoolsCollection, (snapshot) => {
@@ -168,12 +171,25 @@ function createSpoolCardElement(spool, isSingleIsolatedView = false) {
         
         <div class="card-footer">
             <span class="timestamp">Updated: ${formattedDate}</span>
+            <button class="btn btn-primary btn-copy-link" style="padding: 6px 12px; font-size: 0.8rem; background: var(--bg-primary); border: 1px solid var(--border); color: var(--text-primary);">
+                <span class="material-icons" style="font-size: 1.1rem; vertical-align: middle; margin-right: 4px;">link</span> Copy Link
+            </button>
             <span style="font-weight:600; font-size:0.9rem;">₪${Number(spool.cost).toFixed(2)}</span>
         </div>
     `;
 
-    // Hook Up Node Event Operations internally
+    // Hook up internal events
     card.querySelector(".btn-edit-trigger").addEventListener("click", () => openModal(spool));
+    
+    // Copy Link Event Handler Configuration
+    card.querySelector(".btn-copy-link").addEventListener("click", () => {
+        const spoolUrl = `${window.location.origin}${window.location.pathname}?id=${spool.id}`;
+        navigator.clipboard.writeText(spoolUrl).then(() => {
+            alert("Spool link copied to clipboard!");
+        }).catch(err => {
+            console.error("Could not copy link string metadata assets: ", err);
+        });
+    });
     
     const quickInput = card.querySelector(".quick-weight-input");
     card.querySelector(".btn-quick-sub").addEventListener("click", () => {
