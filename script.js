@@ -168,7 +168,7 @@ function createSpoolCardElement(spool, isSingleIsolatedView = false) {
         
         <div class="card-footer">
             <span class="timestamp">Updated: ${formattedDate}</span>
-            <span style="font-weight:600; font-size:0.9rem;">$${Number(spool.cost).toFixed(2)}</span>
+            <span style="font-weight:600; font-size:0.9rem;">₪${Number(spool.cost).toFixed(2)}</span>
         </div>
     `;
 
@@ -211,7 +211,7 @@ function updateStatistics(spools) {
 
     statTotalSpools.textContent = totalSpoolsCount;
     statTotalWeight.textContent = `${(totalWeightRemaining / 1000).toFixed(2)} kg (${totalWeightRemaining}g)`;
-    statTotalCost.textContent = `$${totalCostValuation.toFixed(2)}`;
+    statTotalCost.textContent = `₪${totalCostValuation.toFixed(2)}`;
 }
 
 // --- Modal Presentation Form Utilities Management Window ---
