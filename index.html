@@ -111,4 +111,35 @@
                         <input type="number" id="form-gross-weight" min="0" placeholder="Type here to auto-subtract">
                     </div>
                     <div class="form-group">
-                        <label for="form-remaining
+                        <label for="form-remaining-weight">Calculated Remaining Filament (g) *</label>
+                        <input type="number" id="form-remaining-weight" min="0" required placeholder="Calculated automatically">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="form-cost">Cost (₪) *</label>
+                        <input type="number" id="form-cost" step="0.01" min="0" required placeholder="0.00">
+                    </div>
+                    <div class="form-group">
+                        <label for="form-purchase-date">Purchase Date</label>
+                        <input type="date" id="form-purchase-date">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="form-notes">Notes</label>
+                    <textarea id="form-notes" rows="3" placeholder="Print settings, drying time, temp preferences..."></textarea>
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" id="btn-delete-spool" class="btn btn-danger hidden">Delete Spool</button>
+                    <button type="submit" class="btn btn-primary">Save Spool</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
