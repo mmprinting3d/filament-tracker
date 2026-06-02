@@ -9,7 +9,6 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const spoolsCollection = collection(db, "spools");
 
-// Keep local in-memory snapshot of elements for live rendering UI filtration Engine
 let allSpools = [];
 
 // DOM Element Registry
@@ -25,17 +24,36 @@ const btnCloseModal = document.getElementById("btn-close-modal");
 const btnDeleteSpool = document.getElementById("btn-delete-spool");
 const singleSpoolContainer = document.getElementById("single-spool-container");
 
+// New Automatic Math Inputs
+const formEmptyWeight = document.getElementById("form-empty-weight");
+const formGrossWeight = document.getElementById("form-gross-weight");
+const formRemainingWeight = document.getElementById("form-remaining-weight");
+
 // Stats Registry Elements
 const statTotalSpools = document.getElementById("stat-total-spools");
 const statTotalWeight = document.getElementById("stat-total-weight");
 const statTotalCost = document.getElementById("stat-total-cost");
 
-// Check if Direct URL Param access engine context triggers
+// Check URL Parameters
 const urlParams = new URLSearchParams(window.location.search);
 const targetSpoolId = urlParams.get('id');
 
-// Set theme toggle icon correctly for default Light Mode on boot
+// Default Light Mode icon setup
 themeToggle.innerHTML = `<span class="material-icons">dark_mode</span>`;
+
+// --- Live Auto-Subtraction Event Listeners for the Form ---
+function calculateRemainingFromGross() {
+    const gross = Number(formGrossWeight.value) || 0;
+    const tare = Number(formEmptyWeight.value) || 0;
+    
+    if (gross > 0) {
+        // Automatically subtract empty spool weight from total measured weight
+        formRemainingWeight.value = Math.max(0, gross - tare);
+    }
+}
+formGrossWeight.addEventListener("input", calculateRemainingFromGross);
+formEmptyWeight.addEventListener("input", calculateRemainingFromGross);
+
 
 // --- Real-time Firestore Sync Subscriptions ---
 function initAppListeners() {
@@ -45,30 +63,23 @@ function initAppListeners() {
             allSpools.push({ id: docSnap.id, ...docSnap.data() });
         });
         
-        // Arrange items by updated timestamp order by default
         allSpools.sort((a, b) => (b.lastUpdated?.seconds || 0) - (a.lastUpdated?.seconds || 0));
-        
         processApplicationDataState();
     }, (error) => {
         console.error("Firestore loading failure: ", error);
-        spoolGrid.innerHTML = `<div class="loading-spinner" style="color:var(--danger)">Failed to connect to real-time database. Please check configuration credentials.</div>`;
+        spoolGrid.innerHTML = `<div class="loading-spinner" style="color:var(--danger)">Failed to connect to real-time database.</div>`;
     });
 }
 
-// Global Process logic execution router block
 function processApplicationDataState() {
     updateStatistics(allSpools);
-    
     if (targetSpoolId) {
-        // Run application in isolated single-card NFC/QR configuration mode setup view
         renderSingleSpoolMode(targetSpoolId);
     } else {
-        // Run normal dashboard engine tracking rendering mode logic
         renderSpoolDashboard(allSpools);
     }
 }
 
-// --- Dashboard Component Generator Engine ---
 function renderSpoolDashboard(spoolsArray) {
     singleSpoolContainer.classList.add("hidden");
     spoolGrid.classList.remove("hidden");
@@ -95,7 +106,6 @@ function renderSpoolDashboard(spoolsArray) {
     });
 }
 
-// --- Isolated QR/NFC UI Target Loader view logic ---
 function renderSingleSpoolMode(spoolId) {
     spoolGrid.classList.add("hidden");
     singleSpoolContainer.classList.remove("hidden");
@@ -122,16 +132,15 @@ function renderSingleSpoolMode(spoolId) {
     singleSpoolContainer.appendChild(createSpoolCardElement(spool, true));
 }
 
-// --- Factory Element UI Component Creator function builder ---
 function createSpoolCardElement(spool, isSingleIsolatedView = false) {
     const card = document.createElement("div");
     card.className = "spool-card";
     
     const remaining = Number(spool.remainingWeight) || 0;
     const original = Number(spool.originalWeight) || 1; 
+    const tare = Number(spool.emptyWeight) || 0;
     const pct = Math.max(0, Math.min(100, Math.round((remaining / original) * 100)));
     
-    // Convert timestamp tracking objects neatly
     let formattedDate = "Never";
     if (spool.lastUpdated?.seconds) {
         formattedDate = new Date(spool.lastUpdated.seconds * 1000).toLocaleString([], {month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit'});
@@ -148,6 +157,7 @@ function createSpoolCardElement(spool, isSingleIsolatedView = false) {
         <div class="badges">
             <span class="badge badge-material">${spool.material}</span>
             <span class="badge"><span class="color-preview-badge" style="background-color: ${sanitizeColorName(spool.color)};"></span>Color Preview</span>
+            ${tare > 0 ? `<span class="badge" style="background-color:var(--bg-primary);">Tare: ${tare}g</span>` : ''}
         </div>
         <div class="weight-tracker">
             <div class="weight-details">
@@ -167,7 +177,7 @@ function createSpoolCardElement(spool, isSingleIsolatedView = false) {
             <button class="btn btn-primary btn-quick-save" style="padding: 6px 12px; font-size:0.8rem;">Save</button>
         </div>
 
-        <div class="card-notes">${spool.notes ? spool.notes : 'No specific usage or printer configurations profile notes noted.'}</div>
+        <div class="card-notes">${spool.notes ? spool.notes : 'No extra notes recorded.'}</div>
         
         <div class="card-footer">
             <span class="timestamp">Updated: ${formattedDate}</span>
@@ -178,16 +188,14 @@ function createSpoolCardElement(spool, isSingleIsolatedView = false) {
         </div>
     `;
 
-    // Hook up internal events
     card.querySelector(".btn-edit-trigger").addEventListener("click", () => openModal(spool));
     
-    // Copy Link Event Handler Configuration
     card.querySelector(".btn-copy-link").addEventListener("click", () => {
         const spoolUrl = `${window.location.origin}${window.location.pathname}?id=${spool.id}`;
         navigator.clipboard.writeText(spoolUrl).then(() => {
             alert("Spool link copied to clipboard!");
         }).catch(err => {
-            console.error("Could not copy link string metadata assets: ", err);
+            console.error("Could not copy link: ", err);
         });
     });
     
@@ -207,14 +215,13 @@ function createSpoolCardElement(spool, isSingleIsolatedView = false) {
                 lastUpdated: serverTimestamp()
             });
         } catch (err) {
-            alert("Error running quick update cycle updates: " + err.message);
+            alert("Error running quick update: " + err.message);
         }
     });
 
     return card;
 }
 
-// --- Realtime Dashboard Global Stats calculations ---
 function updateStatistics(spools) {
     let totalSpoolsCount = spools.length;
     let totalWeightRemaining = 0;
@@ -230,10 +237,9 @@ function updateStatistics(spools) {
     statTotalCost.textContent = `₪${totalCostValuation.toFixed(2)}`;
 }
 
-// --- Modal Presentation Form Utilities Management Window ---
 function openModal(spool = null) {
     spoolForm.reset();
-    document.getElementById("form-purchase-date").valueAsDate = new Date(); // Standard auto set configuration placeholder
+    document.getElementById("form-purchase-date").valueAsDate = new Date();
     
     if (spool) {
         modalTitle.textContent = "Edit Spool Information";
@@ -242,7 +248,12 @@ function openModal(spool = null) {
         document.getElementById("form-material").value = spool.material;
         document.getElementById("form-color").value = spool.color;
         document.getElementById("form-original-weight").value = spool.originalWeight;
-        document.getElementById("form-remaining-weight").value = spool.remainingWeight;
+        
+        // Load Empty Spool Weight data safely
+        formEmptyWeight.value = spool.emptyWeight || 0;
+        formRemainingWeight.value = spool.remainingWeight;
+        formGrossWeight.value = ""; // Start blank for new measurements
+        
         document.getElementById("form-cost").value = spool.cost;
         document.getElementById("form-purchase-date").value = spool.purchaseDate || "";
         document.getElementById("form-notes").value = spool.notes || "";
@@ -250,6 +261,7 @@ function openModal(spool = null) {
     } else {
         modalTitle.textContent = "Add New Inventory Spool";
         document.getElementById("form-id").value = "";
+        formEmptyWeight.value = 220; // Default placeholder for standard plastic spools
         btnDeleteSpool.classList.add("hidden");
     }
     spoolModal.classList.remove("hidden");
@@ -259,7 +271,6 @@ function closeModal() {
     spoolModal.classList.add("hidden");
 }
 
-// --- Event Registration Handlers Blocks ---
 spoolForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     
@@ -268,16 +279,16 @@ spoolForm.addEventListener("submit", async (e) => {
     const material = document.getElementById("form-material").value;
     const color = document.getElementById("form-color").value.trim();
     const originalWeight = Number(document.getElementById("form-original-weight").value);
-    const remainingWeight = Number(document.getElementById("form-remaining-weight").value);
+    const emptyWeight = Number(formEmptyWeight.value);
+    const remainingWeight = Number(formRemainingWeight.value);
     const cost = Number(document.getElementById("form-cost").value);
     const purchaseDate = document.getElementById("form-purchase-date").value;
     const notes = document.getElementById("form-notes").value.trim();
 
-    // ID String Generator Strategy: Generate descriptive IDs if new, or keep active ID if update operation occurs
     const documentTargetId = idValue ? idValue : `${brand.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${color.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString().slice(-4)}`;
 
     const dataPayload = {
-        brand, material, color, originalWeight, remainingWeight, cost, purchaseDate, notes,
+        brand, material, color, originalWeight, emptyWeight, remainingWeight, cost, purchaseDate, notes,
         lastUpdated: serverTimestamp()
     };
 
@@ -285,7 +296,7 @@ spoolForm.addEventListener("submit", async (e) => {
         await setDoc(doc(db, "spools", documentTargetId), dataPayload, { merge: true });
         closeModal();
     } catch (err) {
-        alert("Firestore transaction writing exception raised: " + err.message);
+        alert("Firestore writing error: " + err.message);
     }
 });
 
@@ -293,21 +304,19 @@ btnDeleteSpool.addEventListener("click", async () => {
     const idValue = document.getElementById("form-id").value;
     if (!idValue) return;
     
-    if (confirm("Are you entirely sure you want to completely delete this spool data record from deployment clusters permanently?")) {
+    if (confirm("Are you sure you want to delete this spool?")) {
         try {
             await deleteDoc(doc(db, "spools", idValue));
             closeModal();
-            // If the user was viewing this via specific isolated ID parameters, return back safely to base site root directory
             if (targetSpoolId) {
                 window.location.href = window.location.origin + window.location.pathname;
             }
         } catch (err) {
-            alert("Deletion routing engine execution failed: " + err.message);
+            alert("Deletion failed: " + err.message);
         }
     }
 });
 
-// Dark/Light layout logic toggles state switches functions
 themeToggle.addEventListener("click", () => {
     const body = document.body;
     const isDark = body.classList.toggle("dark-mode");
@@ -315,14 +324,12 @@ themeToggle.addEventListener("click", () => {
     themeToggle.innerHTML = `<span class="material-icons">${isDark ? 'light_mode' : 'dark_mode'}</span>`;
 });
 
-// Input filtering updates triggers
 searchInput.addEventListener("input", () => renderSpoolDashboard(allSpools));
 filterMaterial.addEventListener("change", () => renderSpoolDashboard(allSpools));
 btnOpenAddModal.addEventListener("click", () => openModal(null));
 btnCloseModal.addEventListener("click", closeModal);
 window.addEventListener("click", (e) => { if(e.target === spoolModal) closeModal(); });
 
-// Quick visual hex color generator utility for preview circle badge
 function sanitizeColorName(str) {
     const basicColors = ['red', 'green', 'blue', 'yellow', 'black', 'white', 'orange', 'purple', 'grey', 'gray', 'pink', 'brown', 'silver', 'gold'];
     const lower = str.toLowerCase();
@@ -332,5 +339,4 @@ function sanitizeColorName(str) {
     return 'transparent';
 }
 
-// Global Core App Launch Ignition Trigger
 initAppListeners();
