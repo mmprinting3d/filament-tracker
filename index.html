@@ -10,7 +10,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 </head>
-<body class="light-mode"> <header>
+<body class="light-mode"> 
+    <header>
         <div class="header-container">
             <h1><span class="material-icons">layers</span> Filament Tracker</h1>
             <button id="toggle-theme" class="icon-btn"><span class="material-icons">light_mode</span></button>
@@ -95,39 +96,19 @@
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="form-original-weight">Original Net Weight (g) *</label>
+                        <label for="form-original-weight">Original Net Filament Weight (g) *</label>
                         <input type="number" id="form-original-weight" min="0" required placeholder="e.g., 1000">
                     </div>
                     <div class="form-group">
-                        <label for="form-remaining-weight">Remaining Weight (g) *</label>
-                        <input type="number" id="form-remaining-weight" min="0" required placeholder="e.g., 1000">
+                        <label for="form-empty-weight">Empty Spool Weight / Tare (g) *</label>
+                        <input type="number" id="form-empty-weight" min="0" required placeholder="e.g., 220">
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="form-cost">Cost (₪) *</label>
-                        <input type="number" id="form-cost" step="0.01" min="0" required placeholder="0.00">
+                        <label for="form-gross-weight">Total Current Weight (Spool + Plastic) (g)</label>
+                        <input type="number" id="form-gross-weight" min="0" placeholder="Type here to auto-subtract">
                     </div>
                     <div class="form-group">
-                        <label for="form-purchase-date">Purchase Date</label>
-                        <input type="date" id="form-purchase-date">
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label for="form-notes">Notes</label>
-                    <textarea id="form-notes" rows="3" placeholder="Print settings, drying time, temp preferences..."></textarea>
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" id="btn-delete-spool" class="btn btn-danger hidden">Delete Spool</button>
-                    <button type="submit" class="btn btn-primary">Save Spool</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script type="module" src="script.js"></script>
-</body>
-</html>
+                        <label for="form-remaining
